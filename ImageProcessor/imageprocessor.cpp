@@ -40,6 +40,8 @@ void ImageProcessor::createMenus (){
     fileMenu=menuBar ()->addMenu (QStringLiteral("檔案&F"));
     fileMenu->addAction(openFileAction);
     fileMenu->addAction (exitAction);
+    fileMenu=menuBar ()->addMenu (QStringLiteral("Tools"));
+
 }
 void ImageProcessor::createToolBars (){}
 void ImageProcessor::loadFile(QString filename){
