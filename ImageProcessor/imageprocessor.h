@@ -2,7 +2,7 @@
 #define IMAGEPROCESSOR_H
 
 #include <QMainWindow>
-#include <QACtion>
+#include <QAction>
 #include <QMenu>
 #include <QToolBar>
 #include <QImage>
@@ -21,6 +21,7 @@ public:
     void loadFile (QString filename);
 private slots:
     void showOpenFile();
+
 private:
     QWidget *central;
     QMenu *fileMenu;
@@ -30,5 +31,10 @@ private:
     QLabel *imgWin;
     QAction *openFileAction;
     QAction *exitAction;
+
+
+
+
+
 };
 #endif // IMAGEPROCESSOR_H

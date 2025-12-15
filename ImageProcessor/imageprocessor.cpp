@@ -34,6 +34,7 @@ void ImageProcessor::createActions (){
     exitAction->setShortcut (tr("Ctrl+Q"));
     exitAction->setStatusTip (QStringLiteral ("退出程式"));
     connect (exitAction, SIGNAL (triggered()), this, SLOT (close()));
+
 }
 void ImageProcessor::createMenus (){
     fileMenu=menuBar ()->addMenu (QStringLiteral("檔案&F"));
