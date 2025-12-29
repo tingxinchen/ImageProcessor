@@ -100,14 +100,14 @@ void ImageProcessor::showOpenFile()
 void ImageProcessor::showGeometryTransform()
 {
     if (!gWin)
-        gWin = new GTransFrom(nullptr); // 獨立視窗
+        gWin = new GTransFrom(nullptr);
 
     if (!img.isNull()) {
         gWin->srcImg = img;
         gWin->inWin->setPixmap(QPixmap::fromImage(gWin->srcImg));
     }
 
-    gWin->resize(500, 400); // 設定大小
+    gWin->resize(500, 400);
     gWin->show();
     gWin->raise();
     gWin->activateWindow();
