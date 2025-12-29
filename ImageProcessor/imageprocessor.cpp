@@ -3,73 +3,112 @@
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QDebug>
+#include <QPixmap>
+#include <QColor>
 
 ImageProcessor::ImageProcessor(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), gWin(nullptr)
 {
-    setWindowTitle (QStringLiteral("影像處理"));
-    central =new QWidget();
-    QHBoxLayout *mainLayout = new QHBoxLayout (central);
+    setWindowTitle(QStringLiteral("影像處理"));
+
+    central = new QWidget(this);
+    QHBoxLayout *mainLayout = new QHBoxLayout(central);
+
     imgWin = new QLabel();
-    QPixmap
-        *initPixmap = new QPixmap(300,200);
-    initPixmap->fill(QColor(255,255,255));
-    imgWin->resize (300,200);
+    QPixmap initPixmap(300, 200);
+    initPixmap.fill(QColor(255, 255, 255));
+
+    imgWin->setFixedSize(300, 200);
     imgWin->setScaledContents(true);
-    imgWin->setPixmap (*initPixmap);
-    mainLayout->addWidget (imgWin);
-    setCentralWidget (central);
+    imgWin->setPixmap(initPixmap);
+
+    mainLayout->addWidget(imgWin);
+    setCentralWidget(central);
+
     createActions();
     createMenus();
     createToolBars();
 }
 
-ImageProcessor::~ImageProcessor() {}
-void ImageProcessor::createActions (){
-    openFileAction=new QAction (QStringLiteral("開啟檔案&0"),this);
-    openFileAction->setShortcut (tr("Ctrl+0"));
-    openFileAction->setStatusTip (QStringLiteral("開啟影像檔案"));
-    connect (openFileAction, SIGNAL (triggered()), this, SLOT (showOpenFile()));
-    exitAction = new QAction (QStringLiteral("結束&Q"),this);
-    exitAction->setShortcut (tr("Ctrl+Q"));
-    exitAction->setStatusTip (QStringLiteral ("退出程式"));
-    connect (exitAction, SIGNAL (triggered()), this, SLOT (close()));
-
+ImageProcessor::~ImageProcessor()
+{
+    if (gWin) delete gWin;
 }
-void ImageProcessor::createMenus (){
-    fileMenu=menuBar ()->addMenu (QStringLiteral("檔案&F"));
+
+void ImageProcessor::createActions()
+{
+    openFileAction = new QAction(QStringLiteral("開啟檔案(&O)"), this);
+    openFileAction->setShortcut(tr("Ctrl+O"));
+    openFileAction->setStatusTip(QStringLiteral("開啟影像檔案"));
+    connect(openFileAction, &QAction::triggered, this, &ImageProcessor::showOpenFile);
+
+    exitAction = new QAction(QStringLiteral("結束(&Q)"), this);
+    exitAction->setShortcut(tr("Ctrl+Q"));
+    exitAction->setStatusTip(QStringLiteral("退出程式"));
+    connect(exitAction, &QAction::triggered, [this]() {
+        if (gWin) gWin->close();
+        this->close();
+    });
+
+    geometryAction = new QAction(QStringLiteral("幾何轉換"), this);
+    geometryAction->setShortcut(tr("Ctrl+G"));
+    geometryAction->setStatusTip(QStringLiteral("影像幾何轉換"));
+    connect(geometryAction, &QAction::triggered, this, &ImageProcessor::showGeometryTransform);
+}
+
+void ImageProcessor::createMenus()
+{
+    fileMenu = menuBar()->addMenu(QStringLiteral("檔案(&F)"));
     fileMenu->addAction(openFileAction);
-    fileMenu->addAction (exitAction);
-    fileMenu=menuBar ()->addMenu (QStringLiteral("Tools"));
+    fileMenu->addAction(exitAction);
+    fileMenu->addAction(geometryAction);
+    QMenu *toolsMenu = menuBar()->addMenu(QStringLiteral("Tools"));
+    toolsMenu->addAction(geometryAction);
+}
 
+void ImageProcessor::createToolBars()
+{
+    fileTool = addToolBar("File");
+    fileTool->addAction(openFileAction);
+    fileTool->addAction(geometryAction);
+    fileTool->addAction(geometryAction);
 }
-void ImageProcessor::createToolBars (){}
-void ImageProcessor::loadFile(QString filename){
-    qDebug() <<QString("file name: %1").arg(filename);
-    QByteArray ba=filename.toLatin1();
-    printf("FN:%s\n", (char *) ba.data());
+
+void ImageProcessor::loadFile(const QString &filename)
+{
+    qDebug() << QString("file name: %1").arg(filename);
     img.load(filename);
-    imgWin->setPixmap (QPixmap:: fromImage (img));
-    fileTool=addToolBar("file");
-    fileTool->addAction (openFileAction);
+    imgWin->setPixmap(QPixmap::fromImage(img));
 }
-void ImageProcessor::showOpenFile(){
-    filename=QFileDialog::getOpenFileName (this,
-                                          QStringLiteral("開啟影像"),
-                                          tr("."),
-                                          "bmp(*.bmp);;png(*.png)"
-                                          ";;Jpeg(*.jpg)");
-    if (!filename.isEmpty())
+
+void ImageProcessor::showOpenFile()
+{
+    QString file = QFileDialog::getOpenFileName(
+        this,
+        QStringLiteral("開啟影像"),
+        tr("."),
+        "BMP (*.bmp);;PNG (*.png);;JPEG (*.jpg)"
+        );
+
+    if (!file.isEmpty())
     {
-        if (img.isNull())
-        {
-            loadFile(filename);
-        }
-        else
-        {
-            ImageProcessor *newIPWin = new ImageProcessor();
-            newIPWin->show();
-            newIPWin->loadFile(filename);
-        }
+        filename = file;
+        loadFile(filename);
     }
+}
+
+void ImageProcessor::showGeometryTransform()
+{
+    if (!gWin)
+        gWin = new GTransFrom(nullptr); // 獨立視窗
+
+    if (!img.isNull()) {
+        gWin->srcImg = img;
+        gWin->inWin->setPixmap(QPixmap::fromImage(gWin->srcImg));
+    }
+
+    gWin->resize(500, 400); // 設定大小
+    gWin->show();
+    gWin->raise();
+    gWin->activateWindow();
 }

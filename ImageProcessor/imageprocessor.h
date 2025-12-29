@@ -7,6 +7,7 @@
 #include <QToolBar>
 #include <QImage>
 #include <QLabel>
+#include "GTransFrom.h"
 
 class ImageProcessor : public QMainWindow
 {
@@ -15,26 +16,29 @@ class ImageProcessor : public QMainWindow
 public:
     ImageProcessor(QWidget *parent = nullptr);
     ~ImageProcessor();
+
     void createActions();
     void createMenus();
     void createToolBars();
-    void loadFile (QString filename);
+    void loadFile(const QString &filename);
+
 private slots:
     void showOpenFile();
+    void showGeometryTransform();
 
 private:
+    GTransFrom *gWin;
     QWidget *central;
     QMenu *fileMenu;
     QToolBar *fileTool;
+
     QImage img;
     QString filename;
     QLabel *imgWin;
+
     QAction *openFileAction;
     QAction *exitAction;
-
-
-
-
-
+    QAction *geometryAction;
 };
+
 #endif // IMAGEPROCESSOR_H
