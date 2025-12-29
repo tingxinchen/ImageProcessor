@@ -16,7 +16,6 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     central = new QWidget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(central);
 
-    // 影像顯示區
     imgWin = new QLabel();
     QPixmap initPixmap(300, 200);
     initPixmap.fill(QColor(255, 255, 255));
@@ -32,7 +31,6 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     mainLayout->addWidget(imgWin);
     setCentralWidget(central);
 
-    // 狀態列
     statusLabel = new QLabel("狀態: 就緒", this);
     mousePosLabel = new QLabel("(0,0) Gray: -", this);
     statusBar()->addPermanentWidget(statusLabel);
@@ -48,7 +46,6 @@ ImageProcessor::~ImageProcessor()
     if (gWin) delete gWin;
 }
 
-// ------------------- Actions -------------------
 void ImageProcessor::createActions()
 {
     openFileAction = new QAction(QStringLiteral("開啟檔案(&O)"), this);
@@ -70,7 +67,6 @@ void ImageProcessor::createActions()
     connect(geometryAction, &QAction::triggered, this, &ImageProcessor::showGeometryTransform);
 }
 
-// ------------------- Menus & ToolBars -------------------
 void ImageProcessor::createMenus()
 {
     fileMenu = menuBar()->addMenu(QStringLiteral("檔案(&F)"));
@@ -89,7 +85,6 @@ void ImageProcessor::createToolBars()
     fileTool->addAction(geometryAction);
 }
 
-// ------------------- File Handling -------------------
 void ImageProcessor::loadFile(const QString &filename)
 {
     qDebug() << QString("file name: %1").arg(filename);
@@ -113,7 +108,6 @@ void ImageProcessor::showOpenFile()
     }
 }
 
-// ------------------- Geometry Transform -------------------
 void ImageProcessor::showGeometryTransform()
 {
     if (!gWin)
@@ -130,7 +124,6 @@ void ImageProcessor::showGeometryTransform()
     gWin->activateWindow();
 }
 
-// ------------------- Mouse Events -------------------
 void ImageProcessor::mouseMoveEvent(QMouseEvent *event)
 {
     if (!img.isNull())
