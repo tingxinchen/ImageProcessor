@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     gtransfrom.cpp \
     main.cpp \
-    imageprocessor.cpp
+    imageprocessor.cpp \
+    mouseevent.cpp
 
 HEADERS += \
     gtransfrom.h \
-    imageprocessor.h
+    imageprocessor.h \
+    mouseevent.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

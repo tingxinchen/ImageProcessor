@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QColor>
+#include <QImage>
+#include <QStatusBar>
 
 ImageProcessor::ImageProcessor(QWidget *parent)
     : QMainWindow(parent), gWin(nullptr)
@@ -14,6 +16,7 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     central = new QWidget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(central);
 
+    // 影像顯示區
     imgWin = new QLabel();
     QPixmap initPixmap(300, 200);
     initPixmap.fill(QColor(255, 255, 255));
@@ -22,8 +25,18 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     imgWin->setScaledContents(true);
     imgWin->setPixmap(initPixmap);
 
+    imgWin->setMouseTracking(true);
+    central->setMouseTracking(true);
+    setMouseTracking(true);
+
     mainLayout->addWidget(imgWin);
     setCentralWidget(central);
+
+    // 狀態列
+    statusLabel = new QLabel("狀態: 就緒", this);
+    mousePosLabel = new QLabel("(0,0) Gray: -", this);
+    statusBar()->addPermanentWidget(statusLabel);
+    statusBar()->addPermanentWidget(mousePosLabel);
 
     createActions();
     createMenus();
@@ -35,6 +48,7 @@ ImageProcessor::~ImageProcessor()
     if (gWin) delete gWin;
 }
 
+// ------------------- Actions -------------------
 void ImageProcessor::createActions()
 {
     openFileAction = new QAction(QStringLiteral("開啟檔案(&O)"), this);
@@ -56,12 +70,14 @@ void ImageProcessor::createActions()
     connect(geometryAction, &QAction::triggered, this, &ImageProcessor::showGeometryTransform);
 }
 
+// ------------------- Menus & ToolBars -------------------
 void ImageProcessor::createMenus()
 {
     fileMenu = menuBar()->addMenu(QStringLiteral("檔案(&F)"));
     fileMenu->addAction(openFileAction);
     fileMenu->addAction(exitAction);
     fileMenu->addAction(geometryAction);
+
     QMenu *toolsMenu = menuBar()->addMenu(QStringLiteral("Tools"));
     toolsMenu->addAction(geometryAction);
 }
@@ -71,9 +87,9 @@ void ImageProcessor::createToolBars()
     fileTool = addToolBar("File");
     fileTool->addAction(openFileAction);
     fileTool->addAction(geometryAction);
-    fileTool->addAction(geometryAction);
 }
 
+// ------------------- File Handling -------------------
 void ImageProcessor::loadFile(const QString &filename)
 {
     qDebug() << QString("file name: %1").arg(filename);
@@ -97,6 +113,7 @@ void ImageProcessor::showOpenFile()
     }
 }
 
+// ------------------- Geometry Transform -------------------
 void ImageProcessor::showGeometryTransform()
 {
     if (!gWin)
@@ -111,4 +128,44 @@ void ImageProcessor::showGeometryTransform()
     gWin->show();
     gWin->raise();
     gWin->activateWindow();
+}
+
+// ------------------- Mouse Events -------------------
+void ImageProcessor::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!img.isNull())
+    {
+        QPoint pos = imgWin->mapFromParent(event->pos());
+        if (pos.x() >= 0 && pos.x() < img.width() &&
+            pos.y() >= 0 && pos.y() < img.height())
+        {
+            int gray = qGray(img.pixel(pos.x(), pos.y()));
+            mousePosLabel->setText(QString("(%1,%2) Gray: %3")
+                                       .arg(pos.x()).arg(pos.y()).arg(gray));
+        }
+        else
+        {
+            mousePosLabel->setText("(-,-) Gray: -");
+        }
+    }
+}
+
+void ImageProcessor::mousePressEvent(QMouseEvent *event)
+{
+    QPoint pos = imgWin->mapFromParent(event->pos());
+    QString str = QString("(%1,%2)").arg(pos.x()).arg(pos.y());
+
+    if (event->button() == Qt::LeftButton)
+        statusLabel->setText(QStringLiteral("左鍵按下: ") + str);
+    else if (event->button() == Qt::RightButton)
+        statusLabel->setText(QStringLiteral("右鍵按下: ") + str);
+    else if (event->button() == Qt::MiddleButton)
+        statusLabel->setText(QStringLiteral("中鍵按下: ") + str);
+}
+
+void ImageProcessor::mouseReleaseEvent(QMouseEvent *event)
+{
+    QPoint pos = imgWin->mapFromParent(event->pos());
+    QString str = QString("(%1,%2)").arg(pos.x()).arg(pos.y());
+    statusLabel->setText(QStringLiteral("釋放: ") + str);
 }

@@ -7,6 +7,7 @@
 #include <QToolBar>
 #include <QImage>
 #include <QLabel>
+#include <QMouseEvent>
 #include "GTransFrom.h"
 
 class ImageProcessor : public QMainWindow
@@ -26,6 +27,11 @@ private slots:
     void showOpenFile();
     void showGeometryTransform();
 
+protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 private:
     GTransFrom *gWin;
     QWidget *central;
@@ -35,6 +41,9 @@ private:
     QImage img;
     QString filename;
     QLabel *imgWin;
+
+    QLabel *statusLabel;
+    QLabel *mousePosLabel;
 
     QAction *openFileAction;
     QAction *exitAction;
